@@ -11,6 +11,7 @@ with `npm install -g truffle`.
 let BN = web3.utils.BN
 let SupplyChain = artifacts.require('SupplyChain')
 let catchRevert = require("./exceptionsHelpers.js").catchRevert
+let catchRevertMsg = require("./exceptionsHelpers.js").catchRevertMsg
 
 contract('SupplyChain', function(accounts) {
 
@@ -69,6 +70,10 @@ contract('SupplyChain', function(accounts) {
         assert.equal(result[5], bob, 'the buyer address should be set bob when he purchases an item')
         assert.equal(new BN(aliceBalanceAfter).toString(), new BN(aliceBalanceBefore).add(new BN(price)).toString(), "alice's balance should be increased by the price of the item")
         assert.isBelow(Number(bobBalanceAfter), Number(new BN(bobBalanceBefore).sub(new BN(price))), "bob's balance should be reduced by more than the price of the item (including gas costs)")
+    })
+
+    it("should error when the sku does not exist", async()=>{
+        await catchRevertMsg(instance.buyItem(0, {from: bob, value: 1}), 'Item does not exist')
     })
 
     it("should error when not enough value is sent when purchasing an item", async()=>{
